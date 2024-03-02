@@ -1,5 +1,5 @@
 Flask==3.0.1
-pytube==11.0.0
+pytube==15.0.0
 pydub==0.25.1
 gunicorn==21.2.0
 

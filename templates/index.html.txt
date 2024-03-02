@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mashup Generator</title>
+</head>
+<body>
+    <h2>Mashup Generator</h2>
+    <form action="/submit" method="post" enctype="multipart/form-data">
+        <label for="singer">Singer Name:</label><br>
+        <input type="text" id="singer" name="singer" required><br>
+        <label for="num_videos">Number of Videos:</label><br>
+        <input type="number" id="num_videos" name="num_videos" min="1" required><br>
+        <label for="audio_duration">Audio Duration to Cut (in seconds):</label><br>
+        <input type="number" id="audio_duration" name="audio_duration" min="1" required><br>
+        <label for="email">Your Email Address:</label><br>
+        <input type="email" id="email" name="email" required><br><br>
+        <input type="submit" value="Submit">
+    </form>
+</body>
+</html>

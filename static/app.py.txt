@@ -1,0 +1,64 @@
+from flask import Flask, render_template, request, redirect, url_for, flash
+import os
+from werkzeug.utils import secure_filename
+from email.mime.multipart import MIMEMultipart
+from email.mime.base import MIMEBase
+from email import encoders
+import smtplib
+
+app = Flask(__name__)
+app.secret_key = 'your_secret_key'
+
+UPLOAD_FOLDER = 'uploads'
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+@app.route('/')
+def index():
+    return render_template('index.html')
+
+@app.route('/submit', methods=['POST'])
+def submit():
+    singer = request.form['singer']
+    num_videos = int(request.form['num_videos'])
+    audio_duration = int(request.form['audio_duration'])
+    email = request.form['email']
+
+    # Perform mashup tasks here (download, convert, merge audio files)
+
+    # Dummy implementation for sending email
+    send_email(email)
+
+    flash('Mashup generated successfully and sent to your email!', 'success')
+    return redirect(url_for('index'))
+
+def send_email(email):
+    # Dummy implementation to send email
+    sender_email = "your_email@example.com"
+    receiver_email = email
+    password = "your_email_password"
+    
+    msg = MIMEMultipart()
+    msg['From'] = sender_email
+    msg['To'] = receiver_email
+    msg['Subject'] = "Mashup Audio"
+
+    body = "Your mashup audio file is attached."
+    msg.attach(MIMEText(body, 'plain'))
+
+    filename = "mashup_audio.mp3"
+    attachment = open(os.path.join(app.config['UPLOAD_FOLDER'], filename), "rb")
+    part = MIMEBase('application', 'octet-stream')
+    part.set_payload(attachment.read())
+    encoders.encode_base64(part)
+    part.add_header('Content-Disposition', "attachment; filename= %s" % filename)
+    msg.attach(part)
+
+    server = smtplib.SMTP('smtp.gmail.com', 587)
+    server.starttls()
+    server.login(sender_email, password)
+    text = msg.as_string()
+    server.sendmail(sender_email, receiver_email, text)
+    server.quit()
+
+if __name__ == '__main__':
+    app.run(debug=True)

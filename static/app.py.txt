@@ -5,6 +5,8 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.base import MIMEBase
 from email import encoders
 import smtplib
+from pytube import YouTube
+from pydub import AudioSegment
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
@@ -24,12 +26,46 @@ def submit():
     email = request.form['email']
 
     # Perform mashup tasks here (download, convert, merge audio files)
+    download_videos(singer, num_videos)
+    convert_to_audio()
+    cut_audio(audio_duration)
+    merge_audios()
 
     # Dummy implementation for sending email
     send_email(email)
 
     flash('Mashup generated successfully and sent to your email!', 'success')
     return redirect(url_for('index'))
+
+def download_videos(singer, num_videos):
+    search_query = singer + " songs"
+    results = YouTube.search(search_query, num_videos)
+    for video in results:
+        stream = video.streams.filter(only_audio=True).first()
+        stream.download(output_path=app.config['UPLOAD_FOLDER'])
+
+def convert_to_audio():
+    for file in os.listdir(app.config['UPLOAD_FOLDER']):
+        if file.endswith(".mp4"):
+            base = os.path.splitext(file)[0]
+            sound = AudioSegment.from_file(os.path.join(app.config['UPLOAD_FOLDER'], file))
+            sound.export(os.path.join(app.config['UPLOAD_FOLDER'], f"{base}.mp3"), format="mp3")
+            os.remove(os.path.join(app.config['UPLOAD_FOLDER'], file))
+
+def cut_audio(duration):
+    for file in os.listdir(app.config['UPLOAD_FOLDER']):
+        if file.endswith(".mp3"):
+            sound = AudioSegment.from_file(os.path.join(app.config['UPLOAD_FOLDER'], file))
+            cut_sound = sound[:duration*1000]
+            cut_sound.export(os.path.join(app.config['UPLOAD_FOLDER'], file), format="mp3")
+
+def merge_audios():
+    files = [file for file in os.listdir(app.config['UPLOAD_FOLDER']) if file.endswith(".mp3")]
+    combined = AudioSegment.empty()
+    for file in files:
+        sound = AudioSegment.from_file(os.path.join(app.config['UPLOAD_FOLDER'], file))
+        combined += sound
+    combined.export(os.path.join(app.config['UPLOAD_FOLDER'], "mashup_audio.mp3"), format="mp3")
 
 def send_email(email):
     # Dummy implementation to send email

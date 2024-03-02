@@ -41,8 +41,12 @@ def download_videos(singer, num_videos):
     search_query = singer + " songs"
     results = YouTube.search(search_query, num_videos)
     for video in results:
+        video_details = video.player_response['microformat']['playerMicroformatRenderer']
+        if 'reelShelfRenderer' in video_details:
+            continue  # Skip this video
         stream = video.streams.filter(only_audio=True).first()
         stream.download(output_path=app.config['UPLOAD_FOLDER'])
+
 
 def convert_to_audio():
     for file in os.listdir(app.config['UPLOAD_FOLDER']):
